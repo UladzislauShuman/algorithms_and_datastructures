@@ -7,7 +7,7 @@ int main()
     std::cin.tie(nullptr);
 
     int n; std::cin >> n;
-    if (n < 3){
+    if (n == 2){
         std::cout << "-1";
         return 0;
     }
@@ -15,6 +15,12 @@ int main()
     std::vector<int> mosquitos(n);
     for (int i = 0; i < n; ++i)
         std::cin >> mosquitos[i];
+
+    
+    if (n == 1){
+        std::cout << mosquitos[0] << "\n1";
+        return 0;
+    }
 
     std::vector<int> dynamic_programming_table(n,0); dynamic_programming_table[1] = -1001;
     // далее в for, если i = 1, то будет dynamic_programming_table[i] = -1001 И складываем с mosquitos[i + 2]. сумма <= -1 < 0 
@@ -55,8 +61,8 @@ int main()
 
     std::cout << dynamic_programming_table[n-1] << "\n"; // сколько съел лягушек
     
-    // ищем путь
-    std::vector<int> result_route((n - 1)>>1 + 2); // в худшем случае, она будет прыгать через 1 (1 3 5 ...)
+    std::vector<int> result_route; // думал, что оно задаёт capacity, но нет -- оказываеться size(). из-за чего у меня куча лишних нулей
+    result_route.reserve((n + 1)>>1);// в худшем случае, она будет прыгать через 1 (1 3 5 ...)
     int i =  n - 1;
     while (i != -1) { //на маркер
         result_route.push_back(i + 1);
