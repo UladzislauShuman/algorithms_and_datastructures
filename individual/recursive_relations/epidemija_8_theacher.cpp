@@ -223,8 +223,7 @@ int main() {
    else { // иначе ищем Lower и Upper
         DP_element upper = DP_element::UpperBound(a);
         DP_element lower = DP_element::LowerBound(a);
-
-        
+        // почему не покаызвает коммит?
    
         if (
             lower.current_sum + (b <= (p_size_sum - lower.current_sum) ? b : (p_size_sum - lower.current_sum)) // lower
