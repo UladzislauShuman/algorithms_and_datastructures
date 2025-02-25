@@ -4,6 +4,7 @@
 #include <set>
 #include <algorithm>
 #include <limits>
+#include <iterator>
 
 typedef unsigned short int USI;
 
@@ -48,8 +49,10 @@ struct DP_element
 {
     // <сумма, которую мы можем достичь, DP_element>
     static std::set<DP_element> dp;
+    static DP_element not_found_element(0, std::numeric_limits<int>::min(), 0);
     static DP_element& UpperBound(int A);
-    static DP_element& LowerBound(int B);
+    static DP_element& EqualBound(int A);
+    static DP_element& LowerBound(int A);
     
     USI last_room_index = 0; // * сумма всех предыдущих * + ПОСЛЕДНЯЯ(эта) добавленная комната
     int current_sum = 0;
@@ -69,6 +72,9 @@ struct DP_element
         return this->current_sum < other.current_sum;
     }
     
+    bool operator== (const DP_element& other) const {
+        return this->current_sum == other.current_sum && this->sum_before == other.sum_before;
+    }
 };
 std::ostream& operator<< (std::ostream& out, const DP_element& element) {
     out     << "DP_element last_room_index: " << element.last_room_index 
@@ -111,6 +117,20 @@ DP_element& DP_element::LowerBound(int A)
     }
 }
 
+DP_element& DP_element::EqualBound(int A)
+{
+    DP_element dummy(0, A, 0); // Создаем фиктивный элемент для поиска
+    auto it = dp.find(dummy);
+
+    if (it != dp.end()) {
+        return const_cast<DP_element&>(*it); // Элемент найден
+    } else {
+        return DP_element::not_found_element;
+    }
+}
+
+
+
 int main() {
     std::ifstream in("input8.txt");
     std::ofstream out("output.txt");
@@ -149,17 +169,92 @@ int main() {
         std::cout << element;
     }
 
-    // находим UpperBound элемент И LowerBound элемент dp по A
-    DP_element upper = DP_element::UpperBound(a);
-    DP_element lower = DP_element::LowerBound(a);
 
+    //ТЕСТ
+    // находим UpperBound элемент И LowerBound элемент dp по A 
+    DP_element upper_ = DP_element::UpperBound(a);
+    DP_element equal_  = DP_element::EqualBound(a);
+    DP_element lower_ = DP_element::LowerBound(a);
     // log
     std::cout   << "\n" 
-                << "LowerBound(A): " << lower 
-                << "UpperBound(A): " << upper
+                << "LowerBound(A): " << lower_
+                << "EqualBound(A): " << equal_ 
+                << "UpperBound(A): " << upper_
                 << "\n";
 
-    out << upper.current_sum << "\n";
+    /*
+    если мы нашли, A задаётся комнатами
+    то есть ли смысл искать LowerBound?
+        я думаю нет, тк -- Эта комната передастся В
+        и будет либо
+            В заполнет те же места, что и А (просто будут гулять А, а не В)
+            либо мы и В всё так и не заполнили -- ну и будут гулять и А, и В
+        т.е. -- смысла нет
+        с UpperBound может быть "хуже"
+    и EqualBound -- будет самым оптимальным решением 
+    если же все же равного нет, то -- искать будем И Lower и Upper
+    и некоторый из них будет оптимальным
+
+    если Lower -- то гуляют некоторые А
+    если Upper -- то Могут гулять некоторые B
+    Lower:
+        lowerSum = Lower.current_sum + B <= (total - Lower.current_sum) ? B : (total - Lower.current_sum);
+    Upper:
+        uppeerSum = A + B <= (total - Upper.current_sum) ? B : (total - Upper.current_sum);
+
+    DP_element result = lowerSum > upperSum? Lower : Upper
+
+        
+    */
+   DP_element optimal;
+   DP_element equal  = DP_element::EqualBound(a);
+   if (equal != DP_element::not_found_element) { // если всё же в dp есть место для A
+        optimal = equal; 
+        /*
+        получается A все сидят
+        и проверяем В
+        */
+        if (b - optimal.current_sum > 0) { // получается, что не все b сидят, все палаты заняти и мы выводим только max
+            out << p_size_sum << "\n";
+        } else { // b - optimal.current_sum <= 0 -- т.е. A и B сидят, зн надо выводить путь А
+            //...
+        }
+   }
+   else { // иначе ищем Lower и Upper
+        DP_element upper = DP_element::UpperBound(a);
+        DP_element lower = DP_element::LowerBound(a);
+
+        
+   
+        if (
+            lower.current_sum + (b <= (p_size_sum - lower.current_sum) ? b : (p_size_sum - lower.current_sum)) // lower
+            >
+            a + (b <= (p_size_sum - upper.current_sum) ? b : (p_size_sum - upper.current_sum)) // upper
+        ) { 
+            /*
+            т.е. -- когда мы не все А заполняем, то помещаем тем самым больше В -- отсюда может и быть более Оптимальным
+            но да -- тем самым мы не всех помещаем
+            зн только максимум вывести
+            */
+           out << p_size_sum << "\n";
+        }
+        else { 
+            /*
+            по крайне мере А все сидят
+            надо проверить В
+            */
+           if (b <= (p_size_sum - upper.current_sum)) // если и Б поместили, то надо вывести путь для А
+           {
+
+           }
+        }
+    }
+
+
+
+    //DP_element lastElement = std::orev(DP_element::dp.end());
+    
+
     
     in.close(); out.close();
     return 0;
