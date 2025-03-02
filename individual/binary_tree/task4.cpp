@@ -214,7 +214,7 @@ public:
     void delete_element_for_task() {
         this->getHeight(); // дерево запомнило свою высоту И заполнило Node-ы о том, сколько у них потомков
         this->collect_nodes_on_half_of_height_helper(this->root, this->height); // собрали все нужны по условию Node-ы
-        if (!this->nodes_on_half_of_height.empty()) {
+        if (!this->nodes_on_half_of_height.empty() and this->nodes_on_half_of_height.size() % 2 == 1) { // если чётное число элементов, то медианный определить нельзя
             int medianIndex = (this->nodes_on_half_of_height.size() - 1) >> 1;
             std::nth_element(this->nodes_on_half_of_height.begin(), 
                             this->nodes_on_half_of_height.begin() + medianIndex, 
@@ -229,8 +229,8 @@ public:
 
 int main() {
  
-    std::ifstream in("input8.txt");
-    std::ofstream out("output.txt");
+    std::ifstream in("in.txt");
+    std::ofstream out("out.txt");
 
     BinaryTree tree;
     
