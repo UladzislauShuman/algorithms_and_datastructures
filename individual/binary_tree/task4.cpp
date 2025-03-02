@@ -101,7 +101,7 @@ private:
     // часть индивидуального задания
     int getHeightHelper(Node* node) {
         if (node == nullptr) {
-            return 0;
+            return -1;
         }
     
         int leftHeight = getHeightHelper(node->left);
@@ -115,12 +115,26 @@ private:
         return 1 + std::max(leftHeight, rightHeight);
     }
     
-
-    
+    std::vector<Node*> nodes_on_half_of_height;
+    void collect_nodes_on_half_of_height_helper(Node* node, int height_) {
+        if (node == nullptr) return;
+        if (height_ == this->height >> 1 ) {
+            if (node->left) {// если он вообще существует, иначе нам не интересно
+                if (!node->right || node->left->descendantsAmount > node->right->descendantsAmount) {
+                    this->nodes_on_half_of_height.push_back(node);
+                }
+            }
+        } else {
+            if (node->left) collect_nodes_on_half_of_height_helper(node->left, height_ - 1);
+            if (node->right) collect_nodes_on_half_of_height_helper(node->right, height_ - 1);
+        }
+    }
 public:
+    int height;
     Node* root;
     BinaryTree() {
         this->root = nullptr;
+        this->height = 0;
     }
     ~BinaryTree() {
         this->deleteBinaryTree(this->root);
@@ -193,12 +207,29 @@ public:
     }
     //часть индивидуального задания
     int getHeight() {
-        return this->getHeightHelper(this->root);
+        this->height = this->getHeightHelper(this->root);
+        return this->height;
+    }
+
+    void delete_element_for_task() {
+        this->getHeight(); // дерево запомнило свою высоту И заполнило Node-ы о том, сколько у них потомков
+        this->collect_nodes_on_half_of_height_helper(this->root, this->height); // собрали все нужны по условию Node-ы
+        if (!this->nodes_on_half_of_height.empty()) {
+            int medianIndex = (this->nodes_on_half_of_height.size() - 1) >> 1;
+            std::nth_element(this->nodes_on_half_of_height.begin(), 
+                            this->nodes_on_half_of_height.begin() + medianIndex, 
+                            this->nodes_on_half_of_height.end(),
+                             [](const Node* a, const Node* b) {
+                                 return a->data < b->data;
+                             });
+            this->delete_node(this->nodes_on_half_of_height[medianIndex]->data);
+        }        
     }
 };
 
 int main() {
-    std::ifstream in("input.txt");
+ 
+    std::ifstream in("input8.txt");
     std::ofstream out("output.txt");
 
     BinaryTree tree;
@@ -207,11 +238,10 @@ int main() {
     while (in >> temp) {
         tree.insert(temp);
     }
-    int height = tree.getHeight(); // вызываем, чтобы он прошёлся по дереву один раз И 
-    std::cout << height << "\n";
+    tree.delete_element_for_task();
     BinaryTree::BinaryTreeIterator it = tree.getBinaryTreeInterator();
     while (!it.isDone()) {
-        std::cout << it.toString() << "\n";
+        out << it.getCurrentNodeData() << "\n";
         it.next();
     }
 
