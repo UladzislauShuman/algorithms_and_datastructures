@@ -13,10 +13,10 @@ typedef unsigned short int USI;
 
 struct Room
 {
-    static int p_filled;
-    static int p_sum_empty;
+    static int p_filled; // когда мы счиытваем и заполняем не пустые палаты, то инфа о таких лежачишь храниться тут
+    static int p_sum_empty; // полная сумма объймом палат
 
-    static std::vector<USI> fullA;
+    static std::vector<USI> fullA; // индексы тех, что хранят в себе приезжах
     USI index;
     USI n;
     USI a_in;
@@ -24,6 +24,8 @@ struct Room
     Room() : index(0), n(0), a_in(0), b_in(0) {}
     Room(USI index, USI n, USI a_in, USI b_in) : index(index), n(n), a_in(a_in), b_in(b_in) {}
     USI getCapacity() const {return n - a_in - b_in;}
+    bool isFull(){return this->a_in == this->n or this->b_in == this->n;}
+
     void fillRoom(USI& a, USI& b) {
         if(this->a_in > 0 and this->a_in != this->n) // второе условие, чтобы не заполнять уже заполненный (50 50 0 к примеру)
             this->fillRoomA(a);
@@ -36,7 +38,7 @@ struct Room
             Room::p_filled += a < (this->n - this->a_in) ? a : (this->n - this->a_in); 
             a = a > (this->n - this->a_in)?  a - (this->n - this->a_in) : 0;
             this ->a_in = this->n;
-            Room::fullA.push_back(this->index);   
+            Room::fullA.push_back(this->index);  // не забываем, что  они у нас тут лежат 
             
         }
     }
@@ -48,9 +50,11 @@ struct Room
             this ->b_in = this->n; 
         }
     }
-    bool isFull(){return this->a_in == this->n or this->b_in == this->n;}
 };
 
+/*
+в этой структуре и храниться наш std::set с "достигаемыми значениеями"
+*/
 struct DP_element
 {
     DP_element(USI last_room_index,int current_sum, int sum_before) :
@@ -65,18 +69,21 @@ struct DP_element
     }
     DP_element() : last_room_index(0), current_sum(0), sum_before(0){}
 
-    // <сумма, которую мы можем достичь, DP_element>
+    /*
+    <сумма, которую мы можем достичь, DP_element> 
+    так же -- тепеь нам не нужно знать факт "достигаемости"
+    */
     static std::set<DP_element> dp;
-    static DP_element not_found_element;
-    static DP_element UpperBound(int A);
+    static DP_element not_found_element; // своего рода nullptr
+    static DP_element UpperBound(int A); // ближайший сверху от А, что мы можем достичь
     static DP_element EqualBound(int A);
-    static DP_element LowerBound(int A);
+    static DP_element LowerBound(int A); // аналогично снизу
     
-    USI last_room_index = 0; // * сумма всех предыдущих * + ПОСЛЕДНЯЯ(эта) добавленная комната
-    int current_sum = 0;
+    USI last_room_index = 0; 
+    int current_sum = 0;// * сумма всех предыдущих * + ПОСЛЕДНЯЯ(эта) добавленная комната
     int sum_before = 0; // то, что было до неё, чтобы потом далее в карте перейти к ней
     
-
+    // нужны, чтобы хранить структуру в set
     bool operator< (const DP_element& other) const {return this->current_sum < other.current_sum;}
     bool operator== (const DP_element& other) const {return this->current_sum == other.current_sum;}
     bool operator!= (const DP_element& other) const {return this->current_sum!= other.current_sum;}
@@ -99,7 +106,7 @@ DP_element DP_element::not_found_element = DP_element(0, -1, 0);
 DP_element DP_element::UpperBound(int A)
 {
     DP_element dummy(0, A, 0); // Создаем фиктивный элемент для поиска
-    auto it = dp.upper_bound(dummy);
+    auto it = dp.upper_bound(dummy); // std::set::upper_bound
 
     if (it == dp.end()) {
         // Если больше A нет элементов, возвращаем последний элемент (или создаем новый с максимальным значением, в зависимости от логики)
@@ -142,15 +149,13 @@ int main() {
     std::ifstream in("input.txt");
     std::ofstream out("output.txt");
 
+    // заполняем данные
     USI a,b,p;
     in >> a >> b >> p;
     Room::fullA.reserve(p);
-    //int p_size_sum = 0;
-
     std::vector<Room> rooms(p);
     for (int i = 0; i < p; ++i)
     {
-        // пересмотреть
         rooms[i].index = i + 1;
         in >> rooms[i].n >> rooms[i].a_in >> rooms[i].b_in;
         rooms[i].fillRoom(a,b);
@@ -158,12 +163,17 @@ int main() {
     }
 
     // заполняем наш dp-массив
+    /*
+    // при итерации по set добавлять в него нельзя (точнее можно, просто всё поломаеться)
+    поэтому -- мы сначала создаём временный, туда добавляем
+    потом переносим в наш И так по новой
+    */
     std::vector<DP_element> temp; temp.reserve(p);
     DP_element::dp.insert(DP_element(0, 0,-1)); // вставляем в начало сумму 0
-    for(const auto room : rooms) { // std::vector<Room> rooms(p);
-        if (room.getCapacity() == 0) continue;
-        for (const auto current_DP_element : DP_element::dp) { // std::set<DP_element> DP_element::dp;
-            temp.push_back(DP_element(room, current_DP_element)); // при итерации по set добавлять в него нельзя (точнее можно, просто всё поломаеться)
+    for(const auto room : rooms) {
+        if (room.getCapacity() == 0) continue; // если уже заполнено, то не надо оно
+        for (const auto current_DP_element : DP_element::dp) {  // итериируемся по set
+            temp.push_back(DP_element(room, current_DP_element)); 
         }
         DP_element::dp.insert(temp.begin(), temp.end());
         temp.clear();
@@ -191,8 +201,6 @@ int main() {
     else { // иначе ищем Lower и Upper
         DP_element upper = DP_element::UpperBound(a);
         DP_element lower = DP_element::LowerBound(a);
-        // почему не покаызвает коммит?
-   
         if (
             lower.current_sum + (b <= (Room::p_sum_empty - lower.current_sum) ? b : (Room::p_sum_empty - lower.current_sum)) // lower
             >
@@ -220,6 +228,7 @@ int main() {
 
 std::string getAPath(DP_element& element)
 {
+    // читаем справа налево
     std::vector<USI> path = Room::fullA;
     path.push_back(element.last_room_index);
     for (auto it = DP_element::dp.find(DP_element(0 ,element.sum_before, 0)); it != DP_element::dp.end();) {
@@ -227,13 +236,14 @@ std::string getAPath(DP_element& element)
         it =  DP_element::dp.find(DP_element(0 ,it->sum_before, 0));
     }
 
+    // теперь нужно не убвыание получить, а возрастание И строку
     std::sort(path.begin(), path.end());
     std::ostringstream out_result;
     for (auto it = ++path.begin(); it != path.end(); ++it) {
         out_result << *it << " ";
     }
     std::string result = out_result.str();
-    if (!result.empty())
+    if (!result.empty()) // чтобы удалить пробел в конце
         result.pop_back();
 
     return result;
