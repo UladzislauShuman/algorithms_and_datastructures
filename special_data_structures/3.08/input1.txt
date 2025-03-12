@@ -1,0 +1,6 @@
+1
+100
+3
+FindSum 0 1
+Add 0 10
+FindSum 0 1
