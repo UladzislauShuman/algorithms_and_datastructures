@@ -88,6 +88,15 @@ long long getLargestPosiblePlaygroundArea(
                             и если она есть, то мы как бы не right - left * up - down
                             а считаем между right - current_x и curren_x - left
     */
+   /*
+   почему я делаю именно так?
+        вообще -- нам нужно как-то установить Право и Лево
+        мы можем делпть примерно так же , как и с Низом и Верхом
+        но -- а как учитывать точки, что могут быть внутри?
+        мы могли просто по точечено смотреть и проверять так же, как и у меня
+            но решение/упрощение/оптимизация что и для Y применима
+        
+   */
     int current_down_y; int current_up_y;
     int left, right, current_x;
     long long temp_square, max_square = 0;
