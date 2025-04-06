@@ -1,3 +1,4 @@
+
 #include <math.h>
 #include <iostream>
 #include <fstream>
@@ -6,16 +7,21 @@ const double pi=3.1415926535897932384;
 
 const double pmax = 1;    // maximum of  IMPACT PARAMETER
 int elstop = 1; // electronic stopping option
-
 double M2 = 28.08, Z2 = 14;  // TARGET
-double M1 = 208.98, Z1 = 83;    const int se = 2;// Ion  Bismuth
+double M1 = 74.92, Z1 = 33;  int se = 4;// Arsenic ION
+//double 	M1 = 30.97, Z1 = 15;    const int se = 1; // Phosphorus ION
+//double M1 = 208.98, Z1 = 83;    const int se = 2;// Ion  Bismuth
+//double M1 = 11.009, Z1 = 5; const int se = 3;// Ion Boron
+// 
+ //double M1 = 74.92, M2 = 28.08, Z1 = 33, Z2 = 14;  int se = 2 ?;// Arsenic ION
+// double M1 = 121.76, M2 = 28.08, Z1 = 51, Z2 = 14;  Antimony ION
 
 const double E0=100000, H=10000;   //================ Estart, xmax (eV &  Angstrem)
 const double Emin=E0/1000;
 
 int NN=1000;  // ==================== number of particles
 
-const double gamma_=4*M1*M2/((M1+M2)*(M1+M2));
+const double gamma=4*M1*M2/((M1+M2)*(M1+M2));
 
 int Nx=500; // число шагов в разбиении всего интервала по глубине 
 
@@ -103,7 +109,7 @@ cout<<"pmax = " << pmax << endl;
 magic();
 double theta=acos(sqrt(c2));   // scattering angle in the center of mass system
 double sinthc=sqrt(s2);
-Tnucl=gamma_*E0*pow((sinthc/2),2);  // the energy transferred in an elastic collision
+Tnucl=gamma*E0*pow((sinthc/2),2);  // the energy transferred in an elastic collision
 cout<<"pmax ="<<pmax<<"  E0="<<E0<<" eV  ,  Theta_c="<<theta<<endl;
 double theta_lab = atan(M2 * sin(theta) / (M1 + M2 * cos(theta)));  // // scattering angle in the laboratory system
 
@@ -142,7 +148,7 @@ for (n=1; n<=NN; n++)   //======================================== main loop
 		double sinthc_m=sqrt(s2);
 		double sumsc=s2+c2;
 		double thetac_m=asin(sinthc_m); // scattering angle in the center of mass system
-		double Tnucl_m=gamma_*E*pow((sinthc_m/2),2);
+		double Tnucl_m=gamma*E*pow((sinthc_m/2),2);
 		Tnucl=Tnucl_m;  // nuclear energy loss in collision
 		T_el = Se(E) * L;  // /electronic energy loss
 		if (elstop == 0) 	 T_el = 0;  //---------------------------------------------- option yes or not el.stopping
