@@ -117,9 +117,8 @@ bool isAmoutInAndOutEquals(const vector<int>& in, const vector<int>& out) {
 bool isStronglyConnected(int& graph_start, const vector<vector<int>>& graph,
         const vector<vector<int>>& graph_transposed, const vector<int>& in, const vector<int>& out
 ) {
-    vector<bool> visited_vertexes(26, false); // посещена ли буква под индексом index
-
-    return dfsAndVisitedOneWay(graph_start, graph, in, out) && dfsAndVisitedOneWay(graph_start, graph_transposed, in, out);
+    return dfsAndVisitedOneWay(graph_start, graph, in, out) && 
+    dfsAndVisitedOneWay(graph_start, graph_transposed, in, out); //(4)
 }
 int getStartOfDetour(const vector<vector<int>>& graph) {
     for (int i = 0; i < 26; ++i) {
@@ -132,7 +131,7 @@ int getStartOfDetour(const vector<vector<int>>& graph) {
     return 0; 
 }
 bool dfsAndVisitedOneWay(int graph_start, const vector<vector<int>>& graph, const vector<int>& in, const vector<int>& out) {
-        vector<bool> visited_vertexes(26, false);
+        vector<bool> visited_vertexes(26, false); // посещена ли буква под индексом index
         dfs(graph_start, graph, visited_vertexes);
         for (int i = 0; i < 26; ++i) 
             if (visited_vertexes[i] == false && // если вершина была не посещена
@@ -217,4 +216,20 @@ void printWinConbination(vector<int>& win_conbination, vector<vector<string>>& w
       t r
         r d 
           ...
+*/
+
+// (4)
+/*
+    транспонирующая матрица она как бы меняет направления 
+    что нам это даёт : 
+        мы начинаем с вершины А, да(к примеру)
+        и первым обходом идём только в одну сторону
+        т.е. -- мы не проверяем как в неё входит
+        а потом, мы меняем направления
+        и тем самым проверяем, что входит
+            ибо -- если из А только выходио, но не входило
+            то при таком обходе мы бы даже "не вышли бы" с А 
+            -> A -> == <- A <-
+            -> A == заведомо не сильно связыннй
+            A -> == A <- -- предыдущий случай
 */
