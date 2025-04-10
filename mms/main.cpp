@@ -125,6 +125,8 @@ for (n=1; n<=NN; n++)   //======================================== main loop
 
 	for (j=1; (j<=100000)&&(E>2*Emin);   j++)  //------------###################### collision loop  // while E>2*Emin; 
 	{		
+		
+		//3)
 		ksi=float(rand())/float(RAND_MAX); 
 		L=1.*ksi/(pi*0.05*pmax*pmax);  //   free movement length
 		
@@ -136,9 +138,11 @@ for (n=1; n<=NN; n++)   //======================================== main loop
 
 		ksi=float(rand())/RAND_MAX;
 		double p=pmax*sqrt(ksi);  //  impact parameter
+
 		eps=E*a_u*M2/(Z1*Z2*ee2*(M1+M2));  //energy in special units
 		b=p/a_u;  //impact parameter  in special units
 		magic();
+		
 		double sinthc_m=sqrt(s2);
 		double sumsc=s2+c2;
 		double thetac_m=asin(sinthc_m); // scattering angle in the center of mass system
