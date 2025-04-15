@@ -20,17 +20,13 @@ using namespace std;
 int find_min_substring_length(string s); 
 
 int main() {
-    std::ifstream in("input.txt");
-    std::ofstream out("output.txt");
 
-    string s; in >> s;
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
 
-    cout << find_min_substring_length(s) << endl;
-    cout << find_min_substring_length("ABCDEF") << endl;
-    cout << find_min_substring_length("AAAAAA") << endl;
-    cout << find_min_substring_length("ABCABCABC") << endl;
+    string s; cin >> s;
+    cout << find_min_substring_length(s);
 
-    in.close(); out.close();
     return 0;
 }
 
