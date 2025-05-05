@@ -177,7 +177,7 @@ double Se(double E) {
 }
 
 int main(int argc, char** argv) {
-    ofstream ofs("D:\\out.txt"); // Файл для вывода результатов
+    ofstream ofs("out.txt"); // Файл для вывода результатов
     
     // Инициализация переменных
     double sum1 = 0; // Сумма глубин остановки для расчета среднего
