@@ -1,3 +1,5 @@
+// чтобы увидеть один график
+
 package org.shuman;
 
 import org.knowm.xchart.*;

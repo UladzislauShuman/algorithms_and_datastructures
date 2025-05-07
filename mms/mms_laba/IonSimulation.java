@@ -1,27 +1,22 @@
-package org.shuman;
-
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Random;
 
 public class IonSimulation {
-    // Основные изменяемые параметры
-    private static final double E0 = 100000, H = 10000;   // Начальная энергия [эВ] и максимальная глубина [ангстрем]
-    private static final double pmax = 1;    // Максимальный прицельный параметр [ангстрем] -
-    // зависит от энергии: 2Å для 1кэВ, 1.5Å для 10кэВ, 1Å для 100кэВ
-    private static int elstop = 1;          // Флаг электронного торможения (1 - включено, 0 - выключено)
-
-    // Физические константы
+    // Константы
     private static final double pi = 3.1415926535897932384;
+    private static final double pmax = 1.0;    // максимальный прицельный параметр [ангстрем]
+    private static int elstop = 1;           // флаг электронного торможения (1 - включено)
 
     // Параметры мишени (кремний)
-    private static final double M2 = 28.08, Z2 = 14;  // Масса [а.е.м.] и заряд [атомный номер] мишени
+    private static final double M2 = 28.08, Z2 = 14;  // масса и заряд мишени [а.е.м. и атомный номер]
 
     // Параметры иона (висмут)
-    private static final double M1 = 208.98, Z1 = 83; // Масса [а.е.м.] и заряд [атомный номер] иона
-    private static final int se = 2;                  // Тип иона для электронного торможения (2 - Bi)
-    private static final double Ec = E0 / 1000;       // Энергия срезки [эВ] - минимальная энергия,
-                                                        // ниже которой ион считается остановившимся
+    private static final double M1 = 208.98, Z1 = 83; // масса и заряд иона [а.е.м. и атомный номер]
+    private static final int se = 2;            // тип иона (для электронного торможения)
+
+    private static final double E0 = 100000.0, H = 10000;   // Начальная энергия [эВ] и максимальная глубина [ангстрем]
+    private static final double Ec = E0 / 1000;           // Энергия срезки [эВ]
 
     private static int NN = 1000;  // Количество моделируемых ионов
 
@@ -143,47 +138,31 @@ public class IonSimulation {
         ofs.close();
     }
 
-    /**
-     * Расчет угла рассеяния в системе центра масс (СЦМ)
-     * Использует итерационный метод для решения уравнения движения
-     * Входные параметры (глобальные переменные):
-     *   eps - безразмерный параметр энергии
-     *   b - безразмерный прицельный параметр
-     * Выходные параметры:
-     *   c2 - cos²θ (θ - угол рассеяния в СЦМ)
-     *   s2 - sin²θ
-     */
+    // Функция вычисления угла рассеяния в системе центра масс
     private static void magic() {
-        // Итерационный алгоритм нахождения параметра столкновения
         double r = b;
         double rr = -2.7 * Math.log(eps * b);
         if (rr >= b) {
             rr = -2.7 * Math.log(eps * rr);
-            if (rr >= b) r = rr;
+            if (rr >= b) {
+                r = rr;
+            }
         }
-
-        // Итерационный процесс уточнения параметров столкновения
         double v, v1;
         while (true) {
-            // Расчет потенциала и его производной
             double ex1 = 0.18175 * Math.exp(-3.1998 * r);
             double ex2 = 0.50986 * Math.exp(-0.94229 * r);
             double ex3 = 0.28022 * Math.exp(-0.4029 * r);
             double ex4 = 0.028171 * Math.exp(-0.20162 * r);
             v = (ex1 + ex2 + ex3 + ex4) / r;
             v1 = -(v + 3.1998 * ex1 + 0.94229 * ex2 + 0.4029 * ex3 + 0.20162 * ex4) / r;
-
-            // Уравнение траектории и его производная
             double fr = b * b / r + v * r / eps - r;
             double fr1 = -b * b / (r * r) + (v + v1 * r) / eps - 1.;
-
-            // Метод Ньютона для уточнения решения
             double q = fr / fr1;
             r = r - q;
-            if (Math.abs(q / r) <= 0.001) break; // Критерий сходимости
+            if (Math.abs(q / r) <= 0.001) break;
         }
 
-        // Расчет угла рассеяния
         double roc = -2. * (eps - v) / v1;
         double sqe = Math.sqrt(eps);
         double cc = (0.011615 + sqe) / (0.0071222 + sqe);
@@ -191,50 +170,35 @@ public class IonSimulation {
         double ff = (Math.sqrt(aa * aa + 1.) - aa) * ((9.3066 + eps) / (14.813 + eps));
         double delta = (r - b) * aa * ff / (ff + 1.);
         double co = (b + delta + roc) / (r + roc);
-
-        c2 = co * co; // cos²θ
-        s2 = 1. - c2; // sin²θ
+        c2 = co * co;
+        s2 = 1. - c2;
     }
 
-    /**
-     * Расчет электронного торможения (энергетических потерь на электронах)
-     * @param E - текущая энергия иона [эВ]
-     * @return потери энергии на единицу длины [эВ/ангстрем]
-     */
+    // Функция расчета электронного торможения
     private static double Se(double E) {
-        double SS, X = E / 1000; // Энергия в кэВ
-
-        // Полиномиальные аппроксимации для разных ионов:
-        if (se == 1) SS = 3.87 + 0.43 * X - 0.00172 * X * X;      // Для As
-        if (se == 2) SS = 6.36419 + 0.78722 * X - 0.00391 * X * X; // Для Bi
-        if (se == 3) SS = 3.30582 + 0.54765 * X - 0.00303 * X * X; // Для P
-        if (se == 4) SS = 2.63632 + 0.32612 * X - 0.00162 * X * X; // Для B
-
-        return SS;
+        double SS, X;
+        X = E / 1000; // Энергия в кэВ
+        // Полиномиальная аппроксимация для разных ионов
+        if (se == 1) SS = 3.87 + 0.43 * X - 0.00172 * X * X;
+        if (se == 2) SS = 6.36419 + 0.78722 * X - 0.00391 * X * X;
+        if (se == 3) SS = 3.30582 + 0.54765 * X - 0.00303 * X * X;
+        if (se == 4) SS = 2.63632 + 0.32612 * X - 0.00162 * X * X;
+        return SS; // Возвращает потери энергии [эВ/ангстрем]
     }
 
-    /**
-     * Поворот вектора скорости после столкновения
-     * @param v - исходный вектор скорости
-     * @param cosTh - косинус угла рассеяния
-     * @param sinTh - синус угла рассеяния
-     */
+    // Функция обновления направления движения иона после столкновения
     private static void changeRotate(double[] v, double cosTh, double sinTh) {
-        // Генерация случайного азимутального угла
         double phi = generateAzimuthalAngle();
 
-        // Построение ортогональной системы координат
         double[] e2 = new double[3];
         calculateOrthogonalVectors(v, e2);
 
         double[] e3 = new double[3];
         calculateThirdOrthogonalVector(v, e2, e3);
 
-        // Расчет нового вектора скорости
         double[] v_new = new double[3];
         updateVelocity(v, cosTh, sinTh, e2, e3, v_new, phi);
 
-        // Обновление вектора скорости
         System.arraycopy(v_new, 0, v, 0, 3);
         normalizeVector(v);
     }
