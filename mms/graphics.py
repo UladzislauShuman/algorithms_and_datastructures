@@ -24,8 +24,7 @@ def plot_data_from_file(filename):
     plt.grid(True)
     plt.show()
 
-# Компиляция и запуск Java-программы
-os.system("javac IonSimulation.java")  # Компиляция
-os.system("java IonSimulation")       # Запуск
+os.system("javac IonSimulation.java")
+os.system("java IonSimulation")       
 
 plot_data_from_file('out.txt')
