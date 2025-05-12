@@ -37,23 +37,22 @@ struct DSU
 {
     vector<int> parents;
     vector<int> rank; 
-    vector<pair<int, int>> history;
+    vector<pair<int, int>> history_parents; // Для отката родителей
+    vector<pair<int, int>> history_rank;    // Для отката рангов
 
-    DSU(int n) { // задает dsu из n вершин
-        parents.resize(n + 1); // тк вершины нумеруются от 1 до n, то для удобства размер будет n+1
+    DSU(int n) {
+        parents.resize(n + 1);
         rank.resize(n + 1, 1);
         for (int i = 1; i <= n; ++i) {
             parents[i] = i;
         }
     }
 
-    int getParent(int v) { // сжатие + не рекурсивная 
+    int getParent(int v) {
         int parent = v;
-        //нашли родителя
         while (parent != parents[parent]) {
             parent = parents[parent];
         }
-        // сжали
         while (v != parent) {
             int next = parents[v];
             parents[v] = parent;
@@ -62,7 +61,7 @@ struct DSU
         return parent;
     }
 
-    bool unite(int a, int b) { // если будет false, то значит при объединении будет цикл
+    bool unite(int a, int b) {
         int parent_a = getParent(a);
         int parent_b = getParent(b);
         if (parent_a == parent_b) {
@@ -72,7 +71,9 @@ struct DSU
         if (rank[parent_a] < rank[parent_b]) {
             swap(parent_a, parent_b);
         }
-        history.push_back({b, parents[parent_b]});  // запоминаем parents[b] = a
+        // Сохраняем состояние перед изменением
+        history_parents.push_back({parent_b, parents[parent_b]});
+        history_rank.push_back({parent_a, rank[parent_a]});
         parents[parent_b] = parent_a;
         if (rank[parent_a] == rank[parent_b]) {
             rank[parent_a]++;
@@ -80,11 +81,26 @@ struct DSU
         return true;
     }
 
-    void doCtrlZ() { // операция для отмены последней операции
-        if (history.empty()) return;
-        auto [v, prev_parent] = history.back();
-        history.pop_back();
-        parents[v] = prev_parent;
+    void saveState() {
+        // Сохраняем текущее состояние DSU
+        history_parents.emplace_back(-1, -1); // Маркер начала сохранения
+        history_rank.emplace_back(-1, -1);
+    }
+
+    void restoreState() {
+        // Восстанавливаем состояние до последнего сохранения
+        while (!history_parents.empty()) {
+            auto [v, prev_parent] = history_parents.back();
+            history_parents.pop_back();
+            if (v == -1) break; // Дошли до маркера
+            parents[v] = prev_parent;
+        }
+        while (!history_rank.empty()) {
+            auto [v, prev_rank] = history_rank.back();
+            history_rank.pop_back();
+            if (v == -1) break; // Дошли до маркера
+            rank[v] = prev_rank;
+        }
     }
 };
 
@@ -143,45 +159,42 @@ long long getMSTWeight(vector<Edge> graph, const int n,const int m) {
 
 
 vector<vector<int>> getAllMST(const int n, const long long& MSTWeight, vector<Edge> graph) {
-    sort(graph.begin(), graph.end(), [](const Edge& a, const Edge& b){
-        if (a.d == b.d) 
-            return a.id < b.id;
-        return a.d < b.d;
+    // Сортируем рёбра по весу, а при равных весах — по порядку ввода (id)
+    sort(graph.begin(), graph.end(), [](const Edge& a, const Edge& b) {
+        //nreturn (a.d != b.d) ? (a.d < b.d) : (a.id < b.id);
+        return  (a.d < b.d);
     });
-    
+
     vector<int> current_graph;
     vector<vector<int>> allMST;
     DSU dsu(n);
-    
-    // перебираем все старты
+
     for (int start = 0; start < graph.size(); ++start) {
         backtrack(start, 0, dsu, n, MSTWeight, graph, current_graph, allMST);
     }
-    
+
+    // Убираем дубликаты без сортировки (если они есть)
     sort(allMST.begin(), allMST.end());
     allMST.erase(unique(allMST.begin(), allMST.end()), allMST.end());
-    
+
     return allMST;
 }
 
 void backtrack(int start, int current_weight, DSU& dsu, 
     const int n, const long long& MSTWeight, const vector<Edge>& graph,
     vector<int>& current_graph, vector<vector<int>>& allMST) {
-    if (current_graph.size() == n - 1) { // если уже дерево
-        // мы получили остово дерево
-        if (current_weight == MSTWeight) { // если обладает минимальным весом
-            vector<int> sorted_mst = current_graph;
-            sort(sorted_mst.begin(), sorted_mst.end());
-            allMST.push_back(sorted_mst);
+        if (current_graph.size() == n - 1) {
+            if (current_weight == MSTWeight) 
+                allMST.push_back(current_graph);
+            return;
         }
-        return; // иначе не интересно и мы закончили в этой ветке
-    }
 
     for (int i = start; i < graph.size(); ++i) {
-        if (current_weight + graph[i].d > MSTWeight) { // если уже вес больше, то смысла нет -- отсекаем ветку
+        if (current_weight + graph[i].d > MSTWeight) 
             continue;
-        }
         
+
+        dsu.saveState(); // Сохраняем состояние DSU
         if (dsu.unite(graph[i].i, graph[i].j)) {
             current_graph.push_back(graph[i].id);
             backtrack(i + 1, current_weight + graph[i].d, dsu,
@@ -189,7 +202,7 @@ void backtrack(int start, int current_weight, DSU& dsu,
                 current_graph, allMST
             );
             current_graph.pop_back();
-            dsu.doCtrlZ();
         }
+        dsu.restoreState(); // Восстанавливаем состояние DSU
     }
 }
