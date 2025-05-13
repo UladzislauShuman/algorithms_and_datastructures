@@ -11,7 +11,14 @@
 - найти вес минимального остовного дерева
 - относительно Этого веса построить все такие остовные деревья, вес которых равен Этому весу
 
-данную задачу я хочу решить по идее backtracing
+отсечения и оптимизации полного перебора
+- определить минимальный вес по алгоритму Крускало O(M logM [сортировка ребер] + M logN[использую DSU с оптимизацией])
+- отсечение по весу (если уже превышает минимальный вес -- отсекаем)
+    - бывают случаи, когда все ребра имеют одинаковый вес
+        тогда отсечений не будет по этому признаку
+    - в случае если веса разныве, то можно получить приличный результат
+- отсечение по связанности -- при добавлении получается цикл? -- отсекаем
+    - используем DSU для проверки связанности и цикличности
 */
 
 
@@ -71,7 +78,7 @@ struct DSU
         if (rank[parent_a] < rank[parent_b]) {
             swap(parent_a, parent_b);
         }
-        // Сохраняем состояние перед изменением
+        
         history_parents.push_back({parent_b, parents[parent_b]});
         history_rank.push_back({parent_a, rank[parent_a]});
         parents[parent_b] = parent_a;
@@ -81,24 +88,23 @@ struct DSU
         return true;
     }
 
-    void saveState() {
-        // Сохраняем текущее состояние DSU
-        history_parents.emplace_back(-1, -1); // Маркер начала сохранения
+    void doCtrlS() {
+        history_parents.emplace_back(-1, -1);
         history_rank.emplace_back(-1, -1);
     }
 
-    void restoreState() {
-        // Восстанавливаем состояние до последнего сохранения
+    void doCtrlZ() {
+
         while (!history_parents.empty()) {
             auto [v, prev_parent] = history_parents.back();
             history_parents.pop_back();
-            if (v == -1) break; // Дошли до маркера
+            if (v == -1) break; 
             parents[v] = prev_parent;
         }
         while (!history_rank.empty()) {
             auto [v, prev_rank] = history_rank.back();
             history_rank.pop_back();
-            if (v == -1) break; // Дошли до маркера
+            if (v == -1) break; 
             rank[v] = prev_rank;
         }
     }
@@ -141,6 +147,7 @@ int main() {
     return 0;
 }
 
+// алгоритм Крускало
 long long getMSTWeight(vector<Edge> graph, const int n,const int m) {
     
     //сортируем ребра согласно их весу
@@ -159,9 +166,7 @@ long long getMSTWeight(vector<Edge> graph, const int n,const int m) {
 
 
 vector<vector<int>> getAllMST(const int n, const long long& MSTWeight, vector<Edge> graph) {
-    // Сортируем рёбра по весу, а при равных весах — по порядку ввода (id)
     sort(graph.begin(), graph.end(), [](const Edge& a, const Edge& b) {
-        //nreturn (a.d != b.d) ? (a.d < b.d) : (a.id < b.id);
         return  (a.d < b.d);
     });
 
@@ -180,6 +185,7 @@ vector<vector<int>> getAllMST(const int n, const long long& MSTWeight, vector<Ed
     return allMST;
 }
 
+// рекурсивно
 void backtrack(int start, int current_weight, DSU& dsu, 
     const int n, const long long& MSTWeight, const vector<Edge>& graph,
     vector<int>& current_graph, vector<vector<int>>& allMST) {
@@ -194,15 +200,16 @@ void backtrack(int start, int current_weight, DSU& dsu,
             continue;
         
 
-        dsu.saveState(); // Сохраняем состояние DSU
+        dsu.doCtrlS(); // сохраняем
+        // изменяем
         if (dsu.unite(graph[i].i, graph[i].j)) {
             current_graph.push_back(graph[i].id);
-            backtrack(i + 1, current_weight + graph[i].d, dsu,
+            backtrack(i + 1, current_weight + graph[i].d, dsu, 
                 n, MSTWeight, graph,
                 current_graph, allMST
             );
             current_graph.pop_back();
         }
-        dsu.restoreState(); // Восстанавливаем состояние DSU
+        dsu.doCtrlZ(); // возвращаем
     }
 }
