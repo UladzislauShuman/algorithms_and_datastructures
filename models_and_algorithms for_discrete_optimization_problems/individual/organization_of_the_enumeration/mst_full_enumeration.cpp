@@ -93,7 +93,7 @@ vector<vector<int>> filterMsts(const vector<Edge>& edges,
 void printResults(const vector<vector<int>>& result, ostream& out);
 
 int main() {
-    ifstream in("test1.txt");
+    ifstream in("test2.txt");
     ofstream out("output.txt");
 
     int n, m;
@@ -168,7 +168,7 @@ void generateCombinations(const vector<Edge>& edges, int n, int m, int start,
 
 // полностью пересматривает O(C(m n-1))
 int findMinWeight(const vector<Edge>& edges, const vector<vector<int>>& allMsts) {
-    int minWeight = INT_MAX;
+    int minWeight = 1000000000;
     for (const auto& mst : allMsts) {
         int weight = 0;
         for (int idx : mst) {

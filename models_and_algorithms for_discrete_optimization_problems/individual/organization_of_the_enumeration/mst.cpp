@@ -44,8 +44,8 @@ struct DSU
 {
     vector<int> parents;
     vector<int> rank; 
-    vector<pair<int, int>> history_parents; // Для отката родителей
-    vector<pair<int, int>> history_rank;    // Для отката рангов
+    vector<pair<int, int>> history_parents;
+    vector<pair<int, int>> history_rank;
 
     DSU(int n) {
         parents.resize(n + 1);
@@ -118,7 +118,8 @@ vector<vector<int>> getAllMST(
         const int n, const long long& MSTWeight, vector<Edge> graph);
 
 int main() {
-    ifstream in("test1.txt");
+    ifstream in("test2.txt");
+    //ifstream in("input.txt");
     ofstream out("output.txt");
 
     // считываем данные
@@ -133,6 +134,7 @@ int main() {
     }
 
     long long MSTWeight = getMSTWeight(graph, n ,m);
+    cout << "MSTWeight = " << MSTWeight << "\n";
     vector<vector<int>> allMST = getAllMST(n, MSTWeight, graph);
 
     //выводим
@@ -178,8 +180,8 @@ vector<vector<int>> getAllMST(const int n, const long long& MSTWeight, vector<Ed
         backtrack(start, 0, dsu, n, MSTWeight, graph, current_graph, allMST);
     }
 
-    // Убираем дубликаты без сортировки (если они есть)
-    sort(allMST.begin(), allMST.end());
+    // удаляем дубликаты
+    sort(allMST.begin(), allMST.end()); // unique после сортировки лучше работает
     allMST.erase(unique(allMST.begin(), allMST.end()), allMST.end());
 
     return allMST;
