@@ -134,15 +134,16 @@ int main() {
     }
 
     long long MSTWeight = getMSTWeight(graph, n ,m);
-    cout << "MSTWeight = " << MSTWeight << "\n";
+    //cout << "MSTWeight = " << MSTWeight << "\n";
     vector<vector<int>> allMST = getAllMST(n, MSTWeight, graph);
 
     //выводим
-    cout << allMST.size() << endl;
+    out << allMST.size() << endl;
     for (const vector<int>& mst : allMST) {
-        for (const int& edge_id : mst) 
-           cout << edge_id << " ";
-        cout << "\n";    
+        for (int i = 0; i < mst.size() - 1; ++i) {
+            out << mst[i] << " ";
+        }
+        out << mst[mst.size() - 1] << "\n";    
     }
 
     in.close(); out.close();
