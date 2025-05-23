@@ -5,11 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9d6bcfd4-131a-4d92-a3b7-08ef6dadd448" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/IonSimulation.class" beforeDir="false" afterPath="$PROJECT_DIR$/IonSimulation.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/IonSimulation.java" beforeDir="false" afterPath="$PROJECT_DIR$/IonSimulation.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out.txt" beforeDir="false" afterPath="$PROJECT_DIR$/out.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/shuman/IonSimulation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/shuman/IonSimulation.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/shuman/IonVisualization.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/shuman/IonVisualization.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -19,6 +18,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
   </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;UladzislauShuman&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;git@github.com:UladzislauShuman/algorithms_and_datastructures.git&quot;,
+    &quot;accountId&quot;: &quot;5659e4ca-d8b5-450c-b27b-c13314f6bc6d&quot;
+  }
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 2
 }</component>
@@ -29,16 +40,16 @@
     <option name="showMembers" value="true" />
     <option name="showVisibilityIcons" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Application.IonSimulationVisualizer.executor": "Run",
-    "Application.IonVisualization.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "main",
-    "last_opened_file_path": "/home/vladlox/git/algorithms_and_datastructures/mms/mms_laba"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.IonSimulationVisualizer.executor&quot;: &quot;Run&quot;,
+    &quot;Application.IonVisualization.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/vladlox/git/algorithms_and_datastructures/mms/mms_laba&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration name="IonVisualization" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="org.shuman.IonVisualization" />

@@ -15,7 +15,7 @@ public class IonSimulation {
     private static final double M1 = 208.98, Z1 = 83; // масса и заряд иона [а.е.м. и атомный номер]
     private static final int se = 2;            // тип иона (для электронного торможения)
 
-    private static final double E0 = 100000.0, H = 10000;   // Начальная энергия [эВ] и максимальная глубина [ангстрем]
+    private static final double E0 = 100000.0, H = 2000;   // Начальная энергия [эВ] и максимальная глубина [ангстрем]
     private static final double Ec = E0 / 1000;           // Энергия срезки [эВ]
 
     private static int NN = 1000;  // Количество моделируемых ионов
