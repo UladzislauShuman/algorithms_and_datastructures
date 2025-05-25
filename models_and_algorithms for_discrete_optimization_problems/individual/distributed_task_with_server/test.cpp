@@ -7,6 +7,8 @@
 
 using namespace std;
 
+double lambda = 0.5;
+
 /*
 идея: жадный алгоритм с эвристикой s + p desc и чередованием переключений процессоров
 */
@@ -41,21 +43,21 @@ Result run_algorithm(const vector<Task> &tasks1, const vector<Task> &tasks2, boo
         i_cpu2 < n2 // или tasks2
     ) {
         // доступные задачи
-        vector<tuple<long, int, int>> candidates; // время завершения, процессор, индекс задачи (мне уже надокучило писать столько классов :) )
+        vector<tuple<double, int, int>> candidates; // время завершения, процессор, индекс задачи (мне уже надокучило писать столько классов :) )
 
         if ( // если 
             i_cpu1 < n1 // мы еще не закончили с tasks1
             && (!enforce_alternation || last_cpu != 1) // чередуемся если нужно
         ) {
             long start = max(server_busy_time, cpu1_busy_time); // можно, когда максимум из 
-            long finish_time = start + tasks1[i_cpu1].s + tasks1[i_cpu1].p; // начало + весь цикл загрузки
+            double finish_time = start + tasks1[i_cpu1].s + lambda * tasks1[i_cpu1].p; // начало + весь цикл загрузки
             candidates.push_back({finish_time, 1, i_cpu1}); 
         }
         if (i_cpu2 < n2 
             && (!enforce_alternation || last_cpu != 2)
         ) { // аналогично для ЦП2
             long start = max(server_busy_time, cpu2_busy_time);
-            long finish_time = start + tasks2[i_cpu2].s + tasks2[i_cpu2].p;
+            double finish_time = start + tasks2[i_cpu2].s + lambda * tasks2[i_cpu2].p;
             candidates.push_back({finish_time, 2, i_cpu2});
         }
 
@@ -121,13 +123,13 @@ int main() {
 
     // предварительно отсортируем
     sort(tasks1.begin(), tasks1.end(), [](const Task& a, const Task& b) {
-            return (a.s + a.p) > (b.s + b.p);
+        return (double)a.s / a.p > (double)b.s / b.p;
     });
     sort(tasks2.begin(), tasks2.end(), [](const Task& a, const Task& b) {
-            return (a.s + a.p) > (b.s + b.p);
+        return (double)a.s / a.p > (double)b.s / b.p;
     });
-    Result res = run_algorithm(tasks1, tasks2, true);  // 1 2 true
 
+    Result res = run_algorithm(tasks1, tasks2, false);  // 1 2 false
 
     out << res.total_time << "\n";
     for (auto [cpu, id] : res.tasks_order)
