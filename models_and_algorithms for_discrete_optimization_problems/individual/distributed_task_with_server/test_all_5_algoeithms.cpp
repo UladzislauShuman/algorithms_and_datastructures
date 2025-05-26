@@ -156,9 +156,9 @@ int main() {
     }
 
 
-    out << res.total_time << "\n";
+    cout << res.total_time << "\n";
     for (auto [cpu, id] : res.tasks_order)
-        out << cpu << " " << id << "\n";
+        cout << cpu << " " << id << "\n";
 
     in.close(); out.close();
     return 0;
